@@ -1,7 +1,7 @@
-import * as cheerio from "cheerio";
-import fetch from "node-fetch";
+const cheerio = require("cheerio");
+const fetch = require("node-fetch");
 
-export async function fetchTrendingTopics(limit = 5) {
+async function fetchTrendingTopics(limit = 5) {
   // NOTE: Production apps should use proper sources/APIs. This is a simple, non-breaking stub.
   // Here we return some sample tech trends; replace with real scraping (Twitter/X, Google Trends) if desired.
   return [
@@ -13,7 +13,7 @@ export async function fetchTrendingTopics(limit = 5) {
   ].slice(0, limit);
 }
 
-export async function scrapeResources(topic) {
+async function scrapeResources(topic) {
   // Minimal Google News scrape for images (best-effort, may change)
   const q = encodeURIComponent(topic);
   const url = `https://news.google.com/search?q=${q}`;
@@ -31,3 +31,5 @@ export async function scrapeResources(topic) {
   const tweets = [];
   return { images, videos, tweets };
 }
+
+module.exports = { fetchTrendingTopics, scrapeResources };

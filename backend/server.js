@@ -1,18 +1,22 @@
-import MongoStore from "connect-mongo";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import "dotenv/config";
-import express from "express";
-import session from "express-session";
-import helmet from "helmet";
-import mongoose from "mongoose";
-import morgan from "morgan";
-import passport from "passport";
-import { router as adminRouter } from "./routes/admin.js";
-import { router as articleRouter } from "./routes/articles.js";
-import { router as authRouter } from "./routes/auth.js";
-import { router as commentRouter } from "./routes/comments.js";
-import "./strategies/google.js";
+const MongoStore = require("connect-mongo");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
+require("dotenv").config();
+const express = require("express");
+const session = require("express-session");
+const helmet = require("helmet");
+const mongoose = require("mongoose");
+const morgan = require("morgan");
+const passport = require("passport");
+
+// Routes
+const { router: adminRouter } = require("./src/routes/admin");
+const { router: articleRouter } = require("./src/routes/article");
+const { router: authRouter } = require("./src/routes/auth");
+const { router: commentRouter } = require("./src/routes/comments");
+
+// Passport strategy
+require("./src/strategies/google");
 
 const app = express();
 
@@ -23,7 +27,7 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// CORS (credentials for session cookies)
+// CORS
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 app.use(
   cors({
@@ -32,20 +36,27 @@ app.use(
   })
 );
 
-// DB
+// MongoDB
 const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
   console.error("[TrendWise] Missing MONGODB_URI");
   process.exit(1);
 }
-await mongoose.connect(MONGODB_URI);
-console.log("[TrendWise] MongoDB connected");
+
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => console.log("[TrendWise] MongoDB connected"))
+  .catch((err) => {
+    console.error("[TrendWise] MongoDB connection error:", err);
+    process.exit(1);
+  });
 
 // Sessions
 const sessionStore = MongoStore.create({
   mongoUrl: MONGODB_URI,
   collectionName: "sessions",
 });
+
 app.use(
   session({
     name: "trendwise.sid",

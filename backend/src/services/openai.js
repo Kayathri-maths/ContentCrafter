@@ -1,10 +1,10 @@
-import OpenAI from "openai";
+const OpenAI = require("openai");
 
 const client = new OpenAI({
+  base_url: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-export async function generateArticleForTopic(topic, resources = {}) {
+async function generateArticleForTopic(topic, resources = {}) {
   const { images = [], videos = [], tweets = [] } = resources;
   const prompt = `
 You are an expert SEO content writer. Write a comprehensive blog article for the topic: "${topic}".
@@ -42,7 +42,7 @@ Also provide a JSON meta block at the end surrounded by META_START ... META_END:
       .join("\n\n") || "No external media found";
 
   const { choices } = await client.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "openai/gpt-oss-120b:free",
     temperature: 0.7,
     messages: [
       {
@@ -89,3 +89,5 @@ Also provide a JSON meta block at the end surrounded by META_START ... META_END:
     },
   };
 }
+
+module.exports = { generateArticleForTopic };

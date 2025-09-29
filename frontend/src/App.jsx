@@ -12,9 +12,9 @@ export default function App() {
       <main className="max-w-5xl mx-auto px-4 py-6">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="article/:slug" element={<Article />} />
-          <Route path="login" element={<Login />} />
-          <Route path="admin" element={<Admin />} />
+          <Route path="/article/:slug" element={<Article />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
         {/* Outlet added for future nested routes */}
         <Outlet />
