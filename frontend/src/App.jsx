@@ -9,7 +9,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <Navbar />
-      <main className="max-w-5xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-4 py-6">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/article/:slug" element={<Article />} />

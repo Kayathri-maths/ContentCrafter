@@ -7,6 +7,7 @@ export default function Admin() {
   const [articles, setArticles] = useState([]);
   const [topic, setTopic] = useState("");
   const navigate = useNavigate();
+
   useEffect(() => {
     let mounted = true;
 
@@ -29,7 +30,6 @@ export default function Admin() {
     };
 
     fetchData();
-
     return () => {
       mounted = false;
     };
@@ -38,10 +38,8 @@ export default function Admin() {
   const onGenerate = async () => {
     try {
       await api.post("/api/generate", { topic });
-
       const { data } = await api.get("/api/articles");
       setArticles(data.items);
-
       setTopic("");
     } catch (err) {
       console.error("Failed to generate article or fetch articles:", err);
@@ -49,44 +47,91 @@ export default function Admin() {
   };
 
   return (
-    <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
+    <section className="max-w-5xl mx-auto px-6 space-y-8">
+      {/* Header */}
+      <header>
+        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+        <p className="text-gray-600 mt-1 text-sm">
+          Manage articles and generate new ones
+        </p>
+      </header>
 
-      <div className="border rounded p-4 space-y-3">
-        <h2 className="font-medium">Generate Article</h2>
-        <div className="flex items-center gap-2">
+      {/* Generate Article */}
+      <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Generate Article
+        </h2>
+        <div className="flex flex-col sm:flex-row items-center gap-3">
           <input
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="Topic (optional, leave empty to use trending)"
-            className="border rounded px-3 py-2 flex-1"
+            placeholder="Topic (optional, leave empty for trending)"
+            className="border border-gray-300 rounded-lg px-4 py-2 flex-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
             onClick={onGenerate}
-            className="bg-blue-600 text-white rounded px-3 py-2"
+            className="bg-blue-600 text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-blue-700 transition"
           >
             Generate
           </button>
         </div>
       </div>
 
-      <div className="border rounded p-4">
-        <h2 className="font-medium mb-3">Articles</h2>
-        <ul className="space-y-2">
-          {articles.map((a) => (
-            <li key={a.slug} className="flex items-center justify-between">
-              <Link
-                to={`/article/${a.slug}`}
-                className="text-blue-600 underline"
-              >
-                {a.title}
-              </Link>
-              <span className="text-xs text-gray-500">
-                {new Date(a.createdAt).toLocaleString()}
-              </span>
-            </li>
-          ))}
-        </ul>
+      {/* Articles List */}
+      <div className="bg-white border border-gray-300 rounded-xl shadow-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Articles</h2>
+
+        {articles.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left border-collapse">
+              <thead className="bg-gray-50 border-b border-gray-300">
+                <tr>
+                  <th className="px-4 py-2 font-medium text-gray-600">Title</th>
+                  <th className="px-4 py-2 font-medium text-gray-600">
+                    Created
+                  </th>
+                  <th className="px-4 py-2 font-medium text-gray-600 text-right">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {articles.map((a) => (
+                  <tr
+                    key={a.slug}
+                    className="border-b border-gray-300 hover:bg-gray-50 transition"
+                  >
+                    <td className="px-4 py-2">
+                      <Link
+                        to={`/article/${a.slug}`}
+                        className="text-blue-600 font-medium hover:underline"
+                      >
+                        {a.title}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2 text-gray-500">
+                      {new Date(a.createdAt).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      <Link
+                        to={`/article/${a.slug}`}
+                        className="text-sm text-gray-700 hover:text-blue-600 transition"
+                      >
+                        View →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-gray-500 text-sm">No articles yet.</p>
+        )}
       </div>
     </section>
   );
