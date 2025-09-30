@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../utils/api.js";
@@ -9,28 +7,45 @@ export default function Admin() {
   const [articles, setArticles] = useState([]);
   const [topic, setTopic] = useState("");
   const navigate = useNavigate();
-
   useEffect(() => {
     let mounted = true;
-    api.get("/auth/me").then((r) => {
-      if (!mounted) return;
-      setMe(r.data);
-      if (!r.data?.roles?.includes("admin")) navigate("/");
-    });
-    api.get("/api/articles").then((r) => {
-      if (!mounted) return;
-      setArticles(r.data.items);
-    });
+
+    const fetchData = async () => {
+      try {
+        const [meResponse, articlesResponse] = await Promise.all([
+          api.get("/auth/me"),
+          api.get("/api/articles"),
+        ]);
+
+        if (!mounted) return;
+
+        setMe(meResponse.data);
+        if (!meResponse.data?.roles?.includes("admin")) navigate("/");
+
+        setArticles(articlesResponse.data.items);
+      } catch (err) {
+        console.error("Failed to fetch data:", err);
+      }
+    };
+
+    fetchData();
+
     return () => {
       mounted = false;
     };
   }, [navigate]);
 
   const onGenerate = async () => {
-    await api.post("/api/generate", { topic });
-    const { data } = await api.get("/api/articles");
-    setArticles(data.items);
-    setTopic("");
+    try {
+      await api.post("/api/generate", { topic });
+
+      const { data } = await api.get("/api/articles");
+      setArticles(data.items);
+
+      setTopic("");
+    } catch (err) {
+      console.error("Failed to generate article or fetch articles:", err);
+    }
   };
 
   return (

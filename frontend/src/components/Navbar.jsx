@@ -7,13 +7,22 @@ export default function Navbar() {
   const [params] = useSearchParams();
   const [me, setMe] = useState(null);
   const [q, setQ] = useState(params.get("q") || "");
-
   useEffect(() => {
     let mounted = true;
-    api
-      .get("/auth/me", { withCredentials: true })
-      .then((r) => mounted && setMe(r.data))
-      .catch(() => {});
+
+    const fetchUser = async () => {
+      try {
+        const response = await api.get("/auth/me", { withCredentials: true });
+        if (mounted) {
+          setMe(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
+    };
+
+    fetchUser();
+
     return () => {
       mounted = false;
     };

@@ -1,7 +1,7 @@
 const OpenAI = require("openai");
 
 const client = new OpenAI({
-  base_url: "https://openrouter.ai/api/v1",
+  baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENAI_API_KEY,
 });
 async function generateArticleForTopic(topic, resources = {}) {
@@ -42,7 +42,7 @@ Also provide a JSON meta block at the end surrounded by META_START ... META_END:
       .join("\n\n") || "No external media found";
 
   const { choices } = await client.chat.completions.create({
-    model: "openai/gpt-oss-120b:free",
+    model: "openai/gpt-oss-20b:free",
     temperature: 0.7,
     messages: [
       {
@@ -56,7 +56,7 @@ Also provide a JSON meta block at the end surrounded by META_START ... META_END:
       },
     ],
   });
-
+  console.log("OpenAI response:", choices?.[0]?.message?.content);
   const raw = choices?.[0]?.message?.content || "";
   // Parse meta from META_START ... META_END
   const metaMatch = raw.match(/META_START([\s\S]*?)META_END/);

@@ -11,4 +11,4 @@ const router = Router();
 router.get("/comments/:slug", getComments);
 router.post("/comment", requireAuth, createComment);
 
-module.exports.router = router;
+module.exports = { router };

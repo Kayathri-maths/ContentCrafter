@@ -13,18 +13,36 @@ export default function Article() {
 
   useEffect(() => {
     let mounted = true;
-    api
-      .get("/auth/me")
-      .then((r) => mounted && setMe(r.data))
-      .catch(() => {});
-    api.get(`/api/article/${slug}`).then((r) => {
-      if (!mounted) return;
-      setArticle(r.data);
-    });
-    api.get(`/api/comments/${slug}`).then((r) => {
-      if (!mounted) return;
-      setComments(r.data.items);
-    });
+
+    const fetchData = async () => {
+      try {
+        const [meRes, articleRes, commentsRes] = await Promise.allSettled([
+          api.get("/auth/me"),
+          api.get(`/api/article/${slug}`),
+          api.get(`/api/comments/${slug}`),
+        ]);
+
+        if (!mounted) return;
+
+        if (meRes.status === "fulfilled") setMe(meRes.value.data);
+        if (articleRes.status === "fulfilled")
+          setArticle(articleRes.value.data);
+        if (commentsRes.status === "fulfilled")
+          setComments(commentsRes.value.data.items);
+
+        if (meRes.status === "rejected")
+          console.error("Failed to fetch user:", meRes.reason);
+        if (articleRes.status === "rejected")
+          console.error("Failed to fetch article:", articleRes.reason);
+        if (commentsRes.status === "rejected")
+          console.error("Failed to fetch comments:", commentsRes.reason);
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
+    };
+
+    fetchData();
+
     return () => {
       mounted = false;
     };
@@ -33,9 +51,17 @@ export default function Article() {
   const onPostComment = async (e) => {
     e.preventDefault();
     if (!comment.trim()) return;
-    const { data } = await api.post("/api/comment", { slug, content: comment });
-    setComments((prev) => [data, ...prev]);
-    setComment("");
+
+    try {
+      const { data } = await api.post("/api/comment", {
+        slug,
+        content: comment,
+      });
+      setComments((prev) => [data, ...prev]);
+      setComment("");
+    } catch (err) {
+      console.error("Failed to post comment:", err);
+    }
   };
 
   const onToggleLike = async () => {
@@ -43,7 +69,9 @@ export default function Article() {
       const { data } = await api.post(`/api/article/${slug}/like`);
       setLiked(data.liked);
       setArticle((prev) => ({ ...prev, likesCount: data.likesCount }));
-    } catch {}
+    } catch (err) {
+      console.error("Failed to toggle like:", err);
+    }
   };
 
   if (!article) return <div>Loading...</div>;

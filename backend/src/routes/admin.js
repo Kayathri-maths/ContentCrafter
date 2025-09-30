@@ -12,4 +12,4 @@ router.post("/generate", requireAdmin, generateArticle);
 router.patch("/article/:slug", requireAdmin, updateArticle);
 router.delete("/article/:slug", requireAdmin, deleteArticle);
 
-module.exports.router = router;
+module.exports = { router };

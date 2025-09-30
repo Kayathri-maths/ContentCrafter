@@ -14,4 +14,4 @@ router.get("/article/:slug", getArticleBySlug);
 router.post("/article", createArticle);
 router.post("/article/:slug/like", requireAuth, toggleLikeArticle);
 
-module.exports.router = router;
+module.exports = { router };

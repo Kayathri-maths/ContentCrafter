@@ -1,5 +1,4 @@
 const cheerio = require("cheerio");
-const fetch = require("node-fetch");
 
 async function fetchTrendingTopics(limit = 5) {
   // NOTE: Production apps should use proper sources/APIs. This is a simple, non-breaking stub.
@@ -17,7 +16,9 @@ async function scrapeResources(topic) {
   // Minimal Google News scrape for images (best-effort, may change)
   const q = encodeURIComponent(topic);
   const url = `https://news.google.com/search?q=${q}`;
+  console.log("Scraping resources from:", url);
   const res = await fetch(url);
+  console.log("Scrape status:", res);
   if (!res.ok) return { images: [], videos: [], tweets: [] };
   const html = await res.text();
   const $ = cheerio.load(html);

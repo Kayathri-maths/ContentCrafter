@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../utils/api.js";
@@ -11,10 +9,20 @@ export default function Home() {
 
   useEffect(() => {
     let mounted = true;
-    api
-      .get("/api/articles", { params: { q } })
-      .then((r) => mounted && setData(r.data))
-      .catch(() => {});
+
+    const fetchArticles = async () => {
+      try {
+        const response = await api.get("/api/articles", { params: { q } });
+        if (mounted) {
+          setData(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch articles:", error);
+      }
+    };
+
+    fetchArticles();
+
     return () => {
       mounted = false;
     };
